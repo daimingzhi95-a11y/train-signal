@@ -1,0 +1,33 @@
+{
+  "version": "1.0",
+  "meta": { "name": "でんちゃん" },
+  "colors": {
+    "body":    "#8aaee0",
+    "belly":   "#e8e0ff",
+    "innerEar":"#ffccd5",
+    "eye":     "#1a1a2e",
+    "nose":    "#ff9ab0",
+    "cheek":   "#ffb3c6",
+    "whisker": "#9999bb"
+  },
+  "sizes": {
+    "headR":   0.82,
+    "bodyR":   0.56,
+    "bodyH":   0.80,
+    "earW":    0.32,
+    "earH":    0.60,
+    "armR":    0.20,
+    "legR":    0.22,
+    "tailLen": 1.0,
+    "tailCurl":1.2,
+    "eyeR":    0.135
+  },
+  "parts": {
+    "whiskers": true,
+    "cheeks":   true,
+    "tail":     true,
+    "eyeShape": "round",
+    "mouthCurve": 1.0
+  },
+  "accessory": { "item": "none" }
+}

@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "items": [
+    { "id": "none",        "label": "なし",       "slot": "head", "unlockAt": 0, "params": {} },
+    { "id": "antenna",     "label": "アンテナ",   "slot": "head", "unlockAt": 0, "params": { "color": "#533afd", "height": 0.38, "tipSize": 0.07 } },
+    { "id": "bow",         "label": "リボン",     "slot": "head", "unlockAt": 0, "params": { "color": "#ff4488", "knotColor": "#cc2266" } },
+    { "id": "hat_mini",    "label": "ミニハット", "slot": "head", "unlockAt": 0, "params": { "color": "#1a1a2e", "brimColor": "#333" } },
+    { "id": "crown",       "label": "王冠",       "slot": "head", "unlockAt": 0, "params": { "color": "#FFD700", "gemColor": "#ff3e9d" } },
+    { "id": "headphones",  "label": "ヘッドフォン","slot": "head", "unlockAt": 0, "params": { "color": "#533afd", "padColor": "#222" } },
+    { "id": "halo",        "label": "光輪",       "slot": "head", "unlockAt": 0, "params": { "color": "#ffe566" } },
+    { "id": "star_crown",  "label": "スター王冠", "slot": "head", "unlockAt": 0, "params": { "color": "#ff8c00" } }
+  ],
+  "bodyColors": [
+    { "id": "blue",   "label": "ブルー",   "color": "#8aaee0", "unlockAt": 0 },
+    { "id": "pink",   "label": "ピンク",   "color": "#f4a7b9", "unlockAt": 0 },
+    { "id": "mint",   "label": "ミント",   "color": "#7ec8a4", "unlockAt": 0 },
+    { "id": "purple", "label": "パープル", "color": "#b39ddb", "unlockAt": 0 },
+    { "id": "orange", "label": "オレンジ", "color": "#ffab76", "unlockAt": 0 },
+    { "id": "yellow", "label": "イエロー", "color": "#f9e07f", "unlockAt": 0 },
+    { "id": "white",  "label": "ホワイト", "color": "#e8e8f0", "unlockAt": 0 },
+    { "id": "black",  "label": "ブラック", "color": "#3a3a4a", "unlockAt": 0 },
+    { "id": "gold",   "label": "ゴールド", "color": "#c8a84b", "unlockAt": 0 }
+  ],
+  "bellyColors": [
+    { "id": "lavender", "label": "ラベンダー", "color": "#d4c8f8", "unlockAt": 0 },
+    { "id": "cream",    "label": "クリーム",   "color": "#ffeedd", "unlockAt": 0 },
+    { "id": "white",    "label": "ホワイト",   "color": "#f5f5f5", "unlockAt": 0 },
+    { "id": "pink",     "label": "ピンク",     "color": "#ffccd5", "unlockAt": 0 },
+    { "id": "mint",     "label": "ミント",     "color": "#c8f0e0", "unlockAt": 0 }
+  ],
+  "eyeColors": [
+    { "id": "black",  "label": "黒",     "color": "#1a1a2e", "unlockAt": 0 },
+    { "id": "blue",   "label": "ブルー", "color": "#1a4a8a", "unlockAt": 0 },
+    { "id": "green",  "label": "グリーン","color": "#1a6a3a", "unlockAt": 0 },
+    { "id": "amber",  "label": "アンバー","color": "#8a4a00", "unlockAt": 0 },
+    { "id": "purple", "label": "紫",     "color": "#4a1a8a", "unlockAt": 0 },
+    { "id": "ruby",   "label": "ルビー", "color": "#8a001a", "unlockAt": 0 }
+  ]
+}
