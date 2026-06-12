@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>でんちゃん — カスタマイズ</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:system-ui,-apple-system,sans-serif;
+      background:#eef1f8;color:#0d253d;
+      min-height:100svh;
+      display:flex;flex-direction:column;align-items:center;
+      padding:20px 12px 80px;
+    }
+    h1{font-size:20px;font-weight:300;letter-spacing:-.3px;margin-bottom:3px}
+    .sub{font-size:12px;color:#64748d;margin-bottom:18px}
+
+    /* ── 3D Card ── */
+    .card{
+      background:white;border-radius:24px;
+      box-shadow:rgba(0,55,112,.10) 0 8px 40px;
+      width:min(320px,100%);overflow:hidden;margin-bottom:18px;
+    }
+    .canvas-wrap{
+      position:relative;
+      background:linear-gradient(150deg,#e8edf8 0%,#f2eef8 100%);
+      cursor:grab;
+    }
+    .canvas-wrap:active{cursor:grabbing}
+    .drag-hint{
+      position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+      font-size:11px;color:rgba(100,116,141,.7);pointer-events:none;
+      background:rgba(255,255,255,.6);padding:3px 10px;border-radius:99px;
+      backdrop-filter:blur(4px);
+    }
+    canvas#mascot{display:block;width:100%;height:310px}
+    .card-footer{padding:13px 18px 15px}
+    .name-row{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+    .char-name{font-size:16px;font-weight:400}
+    .char-lv{font-size:11px;color:#533afd;background:rgba(83,58,253,.09);border-radius:99px;padding:2px 9px}
+    .bar-label{display:flex;justify-content:space-between;font-size:11px;color:#64748d;margin-bottom:4px}
+    .bar-bg{height:5px;background:#e3e8ee;border-radius:99px;overflow:hidden}
+    .bar-fill{height:100%;background:linear-gradient(90deg,#533afd,#FF008C);border-radius:99px;
+      transition:width .6s cubic-bezier(.34,1.56,.64,1)}
+
+    /* ── Panel ── */
+    .panel{
+      width:min(360px,100%);background:white;
+      border-radius:20px;box-shadow:rgba(0,55,112,.07) 0 4px 20px;overflow:hidden;
+    }
+    .tabs{display:flex;border-bottom:1px solid #e3e8ee}
+    .tab-btn{
+      flex:1;padding:10px 0;font-size:12px;font-weight:400;font-family:inherit;
+      background:none;border:none;cursor:pointer;color:#64748d;
+      border-bottom:2px solid transparent;margin-bottom:-1px;
+      transition:color .15s,border-color .15s;
+    }
+    .tab-btn.active{color:#533afd;border-bottom-color:#533afd}
+    .tab-content{display:none;padding:14px 16px}
+    .tab-content.active{display:block}
+
+    .sec{font-size:10px;color:#64748d;letter-spacing:.5px;text-transform:uppercase;
+      margin:13px 0 8px;font-weight:400}
+    .sec:first-child{margin-top:0}
+
+    /* Swatches */
+    .swatches{display:flex;flex-wrap:wrap;gap:8px}
+    .swatch{
+      width:32px;height:32px;border-radius:50%;cursor:pointer;
+      border:3px solid transparent;transition:transform .15s,border-color .15s;
+    }
+    .swatch.active{border-color:#533afd;transform:scale(1.2)}
+
+    /* Acc grid */
+    .acc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+    .acc-btn{
+      background:#f6f9fc;border:1.5px solid #e3e8ee;border-radius:11px;
+      padding:9px 4px 7px;cursor:pointer;font-family:inherit;font-size:10px;color:#64748d;
+      display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .15s;
+    }
+    .acc-btn.active{border-color:#533afd;color:#533afd;background:rgba(83,58,253,.06)}
+    .acc-icon{font-size:20px;line-height:1}
+
+    /* Sliders */
+    .sl-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+    .sl-row label{font-size:12px;color:#64748d;min-width:70px}
+    input[type=range]{flex:1;accent-color:#533afd;cursor:pointer;height:4px}
+    .sl-val{font-size:11px;color:#533afd;min-width:34px;text-align:right;
+      font-variant-numeric:tabular-nums}
+
+    /* Toggle */
+    .tog-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+    .tog-row span{font-size:13px}
+    .tog{position:relative;width:38px;height:21px}
+    .tog input{opacity:0;width:0;height:0}
+    .tog-sl{
+      position:absolute;inset:0;background:#ddd;border-radius:21px;cursor:pointer;
+      transition:background .2s;
+    }
+    .tog-sl::before{
+      content:'';position:absolute;width:15px;height:15px;left:3px;bottom:3px;
+      background:white;border-radius:50%;transition:transform .2s;
+      box-shadow:0 1px 3px rgba(0,0,0,.2);
+    }
+    .tog input:checked+.tog-sl{background:#533afd}
+    .tog input:checked+.tog-sl::before{transform:translateX(17px)}
+
+    /* Upload btn */
+    .up-btn{
+      width:100%;background:#533afd;color:white;border:none;
+      border-radius:99px;padding:13px;font-size:14px;font-family:inherit;
+      cursor:pointer;margin-top:14px;transition:background .15s,transform .1s;
+    }
+    .up-btn:hover{background:#4434d4;transform:translateY(-1px)}
+    .unlock-msg{font-size:12px;color:#FF008C;text-align:center;min-height:16px;margin-top:7px}
+  </style>
+</head>
+<body>
+  <h1>でんちゃん</h1>
+  <p class="sub">ドラッグで回転 · 全アイテム解放済み（テスト）</p>
+
+  <div class="card">
+    <div class="canvas-wrap">
+      <canvas id="mascot"></canvas>
+      <div class="drag-hint">ドラッグで回転</div>
+    </div>
+    <div class="card-footer">
+      <div class="name-row">
+        <span class="char-name">でんちゃん</span>
+        <span class="char-lv" id="charLv">Lv.1</span>
+      </div>
+      <div class="bar-label"><span>投稿数</span><span id="uploadCount">0 / 1</span></div>
+      <div class="bar-bg"><div class="bar-fill" id="uploadBar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="shape">体型</button>
+      <button class="tab-btn" data-tab="color">カラー</button>
+      <button class="tab-btn" data-tab="parts">パーツ</button>
+      <button class="tab-btn" data-tab="acc">アクセ</button>
+    </div>
+
+    <!-- 体型タブ -->
+    <div class="tab-content active" id="tab-shape">
+
+      <p class="sec">頭 / 体</p>
+      <div class="sl-row">
+        <label>頭の大きさ</label>
+        <input type="range" id="headR" min="0.55" max="1.10" step="0.01" value="0.82">
+        <span class="sl-val" id="headR-v">0.82</span>
+      </div>
+      <div class="sl-row">
+        <label>体の大きさ</label>
+        <input type="range" id="bodyR" min="0.30" max="0.80" step="0.01" value="0.56">
+        <span class="sl-val" id="bodyR-v">0.56</span>
+      </div>
+      <div class="sl-row">
+        <label>体の縦幅</label>
+        <input type="range" id="bodyH" min="0.50" max="1.30" step="0.02" value="0.80">
+        <span class="sl-val" id="bodyH-v">0.80</span>
+      </div>
+
+      <p class="sec">耳</p>
+      <div class="sl-row">
+        <label>耳の幅</label>
+        <input type="range" id="earW" min="0.18" max="0.60" step="0.01" value="0.32">
+        <span class="sl-val" id="earW-v">0.32</span>
+      </div>
+      <div class="sl-row">
+        <label>耳の高さ</label>
+        <input type="range" id="earH" min="0.25" max="0.90" step="0.01" value="0.60">
+        <span class="sl-val" id="earH-v">0.60</span>
+      </div>
+
+      <p class="sec">手 / 脚</p>
+      <div class="sl-row">
+        <label>腕の大きさ</label>
+        <input type="range" id="armR" min="0.10" max="0.32" step="0.01" value="0.20">
+        <span class="sl-val" id="armR-v">0.20</span>
+      </div>
+      <div class="sl-row">
+        <label>脚の大きさ</label>
+        <input type="range" id="legR" min="0.12" max="0.35" step="0.01" value="0.22">
+        <span class="sl-val" id="legR-v">0.22</span>
+      </div>
+
+      <p class="sec">尻尾</p>
+      <div class="sl-row">
+        <label>尻尾の長さ</label>
+        <input type="range" id="tailLen" min="0.3" max="2.0" step="0.05" value="1.0">
+        <span class="sl-val" id="tailLen-v">1.00</span>
+      </div>
+      <div class="sl-row">
+        <label>カール</label>
+        <input type="range" id="tailCurl" min="0.2" max="2.5" step="0.05" value="1.2">
+        <span class="sl-val" id="tailCurl-v">1.20</span>
+      </div>
+
+      <p class="sec">目</p>
+      <div class="sl-row">
+        <label>目の大きさ</label>
+        <input type="range" id="eyeR" min="0.06" max="0.22" step="0.005" value="0.135">
+        <span class="sl-val" id="eyeR-v">0.14</span>
+      </div>
+    </div>
+
+    <!-- カラータブ -->
+    <div class="tab-content" id="tab-color">
+      <p class="sec">ボディカラー</p>
+      <div class="swatches" id="bodySwatches"></div>
+      <p class="sec">おなかカラー</p>
+      <div class="swatches" id="bellySwatches"></div>
+      <p class="sec">目の色</p>
+      <div class="swatches" id="eyeSwatches"></div>
+      <p class="sec">耳の内側</p>
+      <div class="swatches" id="earSwatches"></div>
+    </div>
+
+    <!-- パーツタブ -->
+    <div class="tab-content" id="tab-parts">
+      <div class="tog-row">
+        <span>ひげ</span>
+        <label class="tog"><input type="checkbox" id="togW" checked><span class="tog-sl"></span></label>
+      </div>
+      <div class="tog-row">
+        <span>ほっぺ</span>
+        <label class="tog"><input type="checkbox" id="togC" checked><span class="tog-sl"></span></label>
+      </div>
+      <div class="tog-row">
+        <span>しっぽ</span>
+        <label class="tog"><input type="checkbox" id="togT" checked><span class="tog-sl"></span></label>
+      </div>
+
+      <p class="sec">目の形</p>
+      <div style="display:flex;gap:8px">
+        <button class="acc-btn active" id="eyeRound" style="flex:1">
+          <span class="acc-icon">👁️</span>まん丸
+        </button>
+        <button class="acc-btn" id="eyeAlmond" style="flex:1">
+          <span class="acc-icon">😸</span>たれ目
+        </button>
+      </div>
+
+      <p class="sec">笑顔の深さ</p>
+      <div class="sl-row">
+        <label>カーブ</label>
+        <input type="range" id="mouthCurve" min="0" max="2.5" step="0.05" value="1.0">
+        <span class="sl-val" id="mouthCurve-v">1.00</span>
+      </div>
+    </div>
+
+    <!-- アクセタブ -->
+    <div class="tab-content" id="tab-acc">
+      <div class="acc-grid" id="accGrid"></div>
+    </div>
+
+    <div style="padding:0 16px 16px">
+      <button class="up-btn" id="upBtn">＋ 通信速度を投稿（テスト）</button>
+      <p class="unlock-msg" id="unlockMsg"></p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { MascotRenderer } from './mascot.js';
+
+    const THRESHOLDS=[1,3,5,10,20,50];
+    const LVS=['Lv.1','Lv.2','Lv.3','Lv.4','Lv.5','Lv.6','Lv.7'];
+    let uploads=0, R, charData, itemsData;
+    const lv=n=>{ let l=0; for(const t of THRESHOLDS)if(n>=t)l++; return l; };
+    const nextT=n=>THRESHOLDS.find(t=>t>n)??null;
+
+    async function init(){
+      [charData,itemsData]=await Promise.all([
+        fetch('./character.json').then(r=>r.json()),
+        fetch('./items.json').then(r=>r.json()),
+      ]);
+      const cv=document.getElementById('mascot');
+      // Set canvas pixel size explicitly — do NOT rely on clientWidth before layout
+      const dpr = window.devicePixelRatio || 1;
+      const cvW = 320, cvH = 310;
+      cv.width  = cvW * dpr;
+      cv.height = cvH * dpr;
+      cv.style.width  = cvW + 'px';
+      cv.style.height = cvH + 'px';
+      R=new MascotRenderer(cv,charData,itemsData);
+
+      // ── Tabs ──
+      document.querySelectorAll('.tab-btn').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+        });
+      });
+
+      // ── Size sliders ──
+      const sliders = [
+        ['headR',  2], ['bodyR',  2], ['bodyH',  2],
+        ['earW',   2], ['earH',   2],
+        ['armR',   2], ['legR',   2],
+        ['tailLen',2], ['tailCurl',2],
+        ['eyeR',   3],
+      ];
+      sliders.forEach(([id,dec])=>{
+        const el=document.getElementById(id);
+        const vEl=document.getElementById(id+'-v');
+        el.addEventListener('input',()=>{
+          const v=+el.value;
+          vEl.textContent=v.toFixed(dec);
+          R.setSize(id,v);
+        });
+      });
+
+      // ── Color swatches ──
+      const ALL_COLORS=[
+        {id:'blue',   color:'#8aaee0'},{id:'sky',    color:'#7ecef4'},
+        {id:'pink',   color:'#f4a7b9'},{id:'rose',   color:'#f77fa1'},
+        {id:'mint',   color:'#7ec8a4'},{id:'sage',   color:'#a8c8a0'},
+        {id:'purple', color:'#b39ddb'},{id:'lilac',  color:'#c9b8f0'},
+        {id:'orange', color:'#ffab76'},{id:'peach',  color:'#ffd0a0'},
+        {id:'yellow', color:'#f9e07f'},{id:'cream',  color:'#f5f0d8'},
+        {id:'white',  color:'#e8e8f0'},{id:'silver', color:'#b8c0cc'},
+        {id:'gray',   color:'#8888aa'},{id:'black',  color:'#3a3a4a'},
+        {id:'brown',  color:'#a0704a'},{id:'gold',   color:'#c8a84b'},
+      ];
+      const BELLY_COLORS=[
+        {id:'lav',  color:'#e8e0ff'},{id:'cream', color:'#fff3e8'},
+        {id:'wht',  color:'#f5f5f5'},{id:'pink',  color:'#ffccd5'},
+        {id:'mint', color:'#d0f0e0'},{id:'yellow',color:'#fdf5cc'},
+      ];
+      const EYE_COLORS=[
+        {id:'black',  color:'#1a1a2e'},{id:'navy',  color:'#1a3a7a'},
+        {id:'blue',   color:'#2060c0'},{id:'green', color:'#1a6a3a'},
+        {id:'amber',  color:'#8a4a00'},{id:'gold',  color:'#b08000'},
+        {id:'purple', color:'#5a1a8a'},{id:'ruby',  color:'#8a001a'},
+      ];
+
+      buildSwatches('bodySwatches',  ALL_COLORS,   c=>R.setColor('body',c),   charData.colors.body);
+      buildSwatches('bellySwatches', BELLY_COLORS, c=>R.setColor('belly',c),  charData.colors.belly);
+      buildSwatches('eyeSwatches',   EYE_COLORS,   c=>R.setColor('eye',c),    charData.colors.eye);
+      buildSwatches('earSwatches',   BELLY_COLORS, c=>R.setColor('innerEar',c),charData.colors.innerEar);
+
+      // ── Toggles ──
+      document.getElementById('togW').addEventListener('change',e=>R.setPart('whiskers',e.target.checked));
+      document.getElementById('togC').addEventListener('change',e=>R.setPart('cheeks',e.target.checked));
+      document.getElementById('togT').addEventListener('change',e=>R.setPart('tail',e.target.checked));
+
+      // Mouth curve
+      const mcEl=document.getElementById('mouthCurve');
+      mcEl.addEventListener('input',()=>{
+        document.getElementById('mouthCurve-v').textContent=(+mcEl.value).toFixed(2);
+        R.setPart('mouthCurve',+mcEl.value);
+      });
+
+      // Eye shape
+      document.getElementById('eyeRound').addEventListener('click',()=>{
+        R.setPart('eyeShape','round');
+        document.getElementById('eyeRound').classList.add('active');
+        document.getElementById('eyeAlmond').classList.remove('active');
+      });
+      document.getElementById('eyeAlmond').addEventListener('click',()=>{
+        R.setPart('eyeShape','almond');
+        document.getElementById('eyeAlmond').classList.add('active');
+        document.getElementById('eyeRound').classList.remove('active');
+      });
+
+      // ── Accessories ──
+      buildAccGrid();
+
+      // ── Upload ──
+      document.getElementById('upBtn').addEventListener('click',()=>{
+        const ol=lv(uploads); uploads++;
+        updateBar(); R.celebrateUpload();
+        if(lv(uploads)>ol) showMsg('🎉 レベルアップ！');
+      });
+
+      window.addEventListener('resize',()=>R.resize());
+      updateBar();
+    }
+
+    function buildSwatches(id,list,cb,initCol){
+      const wrap=document.getElementById(id); wrap.innerHTML='';
+      list.forEach(item=>{
+        const btn=document.createElement('button');
+        btn.className='swatch'+(item.color===initCol?' active':'');
+        btn.style.background=item.color; btn.title=item.id;
+        btn.addEventListener('click',()=>{
+          wrap.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));
+          btn.classList.add('active'); cb(item.color);
+        });
+        wrap.appendChild(btn);
+      });
+    }
+
+    const ACC_ICONS={none:'✕',antenna:'📡',bow:'🎀',hat_mini:'🎩',crown:'👑',headphones:'🎧',halo:'✨',star_crown:'⭐'};
+    function buildAccGrid(){
+      const wrap=document.getElementById('accGrid'); wrap.innerHTML='';
+      itemsData.items.forEach(item=>{
+        const btn=document.createElement('button');
+        btn.className='acc-btn'+(item.id==='none'?' active':'');
+        btn.innerHTML=`<span class="acc-icon">${ACC_ICONS[item.id]??'?'}</span>${item.label}`;
+        btn.addEventListener('click',()=>{
+          wrap.querySelectorAll('.acc-btn').forEach(b=>b.classList.remove('active'));
+          btn.classList.add('active'); R.setAccessory(item.id);
+        });
+        wrap.appendChild(btn);
+      });
+    }
+
+    function updateBar(){
+      const l=lv(uploads), next=nextT(uploads);
+      document.getElementById('charLv').textContent=LVS[l]??`Lv.${l+1}`;
+      document.getElementById('uploadBar').style.width=(next?(uploads/next*100):100)+'%';
+      document.getElementById('uploadCount').textContent=next?`${uploads} / ${next}`:`${uploads} 🏆`;
+    }
+    function showMsg(msg){
+      const el=document.getElementById('unlockMsg');
+      el.textContent=msg; el.style.opacity='1';
+      setTimeout(()=>el.style.opacity='0',3000);
+    }
+
+    init();
+  </script>
+</body>
+</html>
